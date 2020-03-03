@@ -1,6 +1,6 @@
 {
-  "short_name": "nginx_server_farms",
-  "name": "nginx_server_farms",
+  "short_name": "NginxServerFarms",
+  "name": "NginxServerFarms",
   "icons": [
     {
       "src": "favicon.ico",

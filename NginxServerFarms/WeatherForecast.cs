@@ -1,9 +1,7 @@
 using System;
 
-namespace nginx_server_farms
-{
-    public class WeatherForecast
-    {
+namespace NginxServerFarms {
+    public class WeatherForecast {
         public DateTime Date { get; set; }
 
         public int TemperatureC { get; set; }
