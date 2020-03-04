@@ -15,8 +15,6 @@ namespace NginxServerFarms {
 
         public IConfiguration Configuration { get; }
 
-        
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
             services.AddControllersWithViews();
@@ -26,22 +24,20 @@ namespace NginxServerFarms {
                 configuration.RootPath = "ClientApp/build";
             });
 
-            var nginxConfigService = new NginxConfigService();
+            var nginxConfigFileService = new NginxConfigFileService();
             var configNginxSection = this.Configuration.GetSection("Nginx");
             var serviceName = configNginxSection.GetValue<string>("ServiceName");
             var processName = configNginxSection.GetValue<string>("ProcessName");
 
-            nginxConfigService.Watch(
-                configNginxSection.GetValue<string>("ConfigPath"),
-                configNginxSection.GetValue<int>("FileWatchDebounceTimeMs"));
+            nginxConfigFileService.Watch(
+                configNginxSection.GetValue<string>("ConfigFilePath"),
+                configNginxSection.GetValue<int>("ConfigFileWatchDebounceTimeMs"));
 
-            nginxConfigService.ConfigReadEvent += (s, e) =>
+            nginxConfigFileService.UpstreamsChangedEvent += (s, e) =>
                 WindowsServiceHelper.ForceRestart(serviceName, processName);
 
-            nginxConfigService.ConfigWriteEvent += (s, e) =>
-                WindowsServiceHelper.ForceRestart(serviceName, processName);
-
-            services.AddSingleton<INginxConfigService>(nginxConfigService);
+            services.AddSingleton<INginxConfigFileService>(nginxConfigFileService);
+            services.AddSingleton<INginxHubClient, NginxHubClient>();
 
             services.AddSignalR();
         }

@@ -4,24 +4,29 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace NginxServerFarms.Hubs {
-    public class NginxHub : Hub {
-        private readonly INginxConfigService configService;
+    internal class NginxHub : Hub {
+        private readonly INginxConfigFileService configFileService;
 
         public NginxHub(
-            INginxConfigService configService) {
-            this.configService = configService;
-            this.configService.ConfigReadEvent += HandleConfigReadEvent;
+            INginxConfigFileService configFileService) {
+            this.configFileService = configFileService;
         }
 
-        public void HandleConfigReadEvent(object sender, NginxConfigChangedArgs e) {
-            Clients.All.SendAsync("RefreshConfigs", e.Upstreams);
+        public Task RefreshConfigs(IReadOnlyList<NginxUpstream> upstreams) {
+            return Clients.All.SendAsync("RefreshConfigs", upstreams);
         }
 
-        public async Task SaveConfig(NginxUpstream upstream) =>
-            await this.SaveConfigs(new[] { upstream }).ConfigureAwait(false);
+        public Task<IReadOnlyList<NginxUpstream>> GetUpstreams() {
+            return Task.FromResult(this.configFileService.ReadUpstreams());
+        }
 
-        public async Task SaveConfigs(IReadOnlyList<NginxUpstream> upstreams) {
-            await this.configService.WriteConfig(upstreams).ConfigureAwait(false);
+        public Task SaveUpstream(NginxUpstream upstream) {
+            return this.SaveUpstreams(new[] { upstream });
+        }
+
+        public Task SaveUpstreams(IReadOnlyList<NginxUpstream> upstreams) {
+            this.configFileService.WriteUpstreams(upstreams);
+            return Task.CompletedTask;
         }
     }
 }

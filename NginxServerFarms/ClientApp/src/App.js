@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { Layout } from './components/Layout';
-import { Home } from './components/Home';
+import { About } from './components/About';
 import { FetchData } from './components/FetchData';
 import { Counter } from './components/Counter';
-
-import signalR from '@microsoft/signalr';
-
+import { HubConnectionBuilder } from '@microsoft/signalr';
 import './custom.css'
 
 export default class App extends Component {
@@ -16,30 +14,53 @@ export default class App extends Component {
     super(props);
 
     this.state = {
-      hubConnection : null,
+      hubConnection: null,
+      upstreams: null,
     };
+
+    this.refreshConfigs = this.refreshConfigs.bind(this);
   }
 
-  componentDidMount = () => {
-    const hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl("/nginxHub")
-      .build();
-
-    hubConnection.start()
-      .then(() => console.log('nginxHub started'))
-      .catch(err => console.log(`nginxHub error while connecting: ${err}`))
-
+  refreshConfigs(e) {
+    debugger
     this.setState({
-      hubConnection
+      upstreams: e.upstreams
     })
   }
 
-  render () {
+  componentDidMount = () => {
+    const hubConnection = new HubConnectionBuilder()
+      .withUrl("/nginxHub")
+      .withAutomaticReconnect()
+      .build();
+
+    hubConnection.on('RefreshConfigs', this.refreshConfigs);
+
+    hubConnection.start()
+      .then(() => {
+        hubConnection.invoke('GetUpstreams').then(function (result) {
+          debugger
+          this.setState({
+            upstreams: result
+          })
+        }).catch(function (err) {
+          console.log(`GetConfig failed: ${err}`)
+        })
+      })
+      .catch(err => console.log(`nginxHub error while connecting: ${err}`))
+
+    this.setState({
+      hubConnection: hubConnection
+    })
+  }
+
+  render() {
     return (
       <Layout>
-        <Route exact path='/' component={Home} />
+        <Route exact path='/' component={About} />
         <Route path='/counter' component={Counter} />
         <Route path='/fetch-data' component={FetchData} />
+        <Route path='/about' component={About} />
       </Layout>
     );
   }
