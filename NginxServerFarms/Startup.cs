@@ -37,6 +37,8 @@ namespace NginxServerFarms {
                 WindowsServiceHelper.ForceRestart(serviceName, processName);
 
             services.AddSingleton<INginxConfigFileService>(nginxConfigFileService);
+
+            // adding as singleton ensures the connection stays active once constructed
             services.AddSingleton<INginxHubClient, NginxHubClient>();
 
             services.AddSignalR();

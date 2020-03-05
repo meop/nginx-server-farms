@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace NginxServerFarms.Services {
-    internal interface INginxConfigFileService {
+    public interface INginxConfigFileService {
         void Watch(
             string filePath,
             int fileWatchDebounceTimeMs);
