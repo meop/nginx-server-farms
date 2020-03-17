@@ -1,4 +1,3 @@
-using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
@@ -30,8 +29,8 @@ namespace NginxServerFarms {
             var controlProcessDirectly = this.Configuration.GetValue<bool>("ControlProcessDirectly");
 
             var configNginxSection = this.Configuration.GetSection("Nginx");
-            var processDir = configNginxSection.GetValue<string>("ProcessDir");
-            var processName = configNginxSection.GetValue<string>("ProcessName");
+            var processFileDir = configNginxSection.GetValue<string>("ProcessFileDir");
+            var processFileName = configNginxSection.GetValue<string>("ProcessFileName");
             var serviceName = configNginxSection.GetValue<string>("ServiceName");
 
             nginxConfigFileService.Watch(
@@ -40,11 +39,13 @@ namespace NginxServerFarms {
                 configNginxSection.GetValue<int>("ConfigFileWatchDebounceTimeMs"));
 
             if (controlProcessDirectly) {
-                void processRestart() => WindowsProcessHelper.ForceRestart(processDir, processName);
+                void processRestart() => WindowsProcessHelper.Restart(
+                    processFileDir, processFileName);
                 processRestart();
                 nginxConfigFileService.UpstreamsChangedEvent += (s, e) => processRestart();
             } else {
-                void serviceRestart() => WindowsServiceHelper.ForceRestart(serviceName, processName);
+                void serviceRestart() => WindowsServiceHelper.Restart(
+                    serviceName, processFileName);
                 serviceRestart();
                 nginxConfigFileService.UpstreamsChangedEvent += (s, e) => serviceRestart();
             }

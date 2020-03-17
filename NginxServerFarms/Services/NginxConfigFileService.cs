@@ -114,7 +114,7 @@ namespace NginxServerFarms.Services {
                             var enabled = IsEnabled(line);
                             var server = new NginxUpstreamServer {
                                 Enabled = enabled,
-                                Entry = EnableServer(line).Trim()
+                                Entry = GetServerEntry(line)
                             };
                             if (upstreamServers == null) {
                                 upstreamServers = new List<NginxUpstreamServer> {
@@ -162,7 +162,7 @@ namespace NginxServerFarms.Services {
                                 upstreamServers = null;
                             } else if (IsServer(line)) {
                                 foreach (var upstreamServer in upstreamServers) {
-                                    if (line.Contains(upstreamServer.Entry)) {
+                                    if (upstreamServer.Entry == GetServerEntry(line)) {
                                         line = upstreamServer.Enabled
                                             ? EnableServer(line)
                                             : DisableServer(line);
@@ -173,7 +173,7 @@ namespace NginxServerFarms.Services {
                         }
                         if (IsUpstream(line)) {
                             foreach (var upstream in upstreams) {
-                                if (line.Contains(upstream.Name)) {
+                                if (upstream.Name == GetUpstreamName(line)) {
                                     upstreamServers = upstream.Servers;
                                     break;
                                 }
