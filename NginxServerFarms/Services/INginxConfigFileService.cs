@@ -4,7 +4,8 @@ using System.Collections.Generic;
 namespace NginxServerFarms.Services {
     public interface INginxConfigFileService {
         void Watch(
-            string filePath,
+            string fileDir,
+            string fileName,
             int fileWatchDebounceTimeMs);
 
         IReadOnlyList<NginxUpstream> ReadUpstreams();

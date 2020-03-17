@@ -21,15 +21,16 @@ namespace NginxServerFarms.Services {
         private int fileWatchDebounceTimeMs;
 
         public void Watch(
-            string configFilePath,
+            string configFileDir,
+            string configFileName,
             int fileWatchDebounceTimeMs) {
-            this.configFilePath = configFilePath;
+            this.configFilePath = Path.Join(
+                configFileDir,
+                configFileName
+            );
             this.fileWatchDebounceTimeMs = fileWatchDebounceTimeMs;
 
-            var directory = Path.GetDirectoryName(configFilePath);
-            var file = Path.GetFileName(configFilePath);
-
-            this.fileSystemWatcher = new FileSystemWatcher(directory, file) {
+            this.fileSystemWatcher = new FileSystemWatcher(configFileDir, configFileName) {
                 IncludeSubdirectories = true,
                 NotifyFilter =
                     NotifyFilters.Attributes |
@@ -113,7 +114,7 @@ namespace NginxServerFarms.Services {
                             var enabled = IsEnabled(line);
                             var server = new NginxUpstreamServer {
                                 Enabled = enabled,
-                                Entry = EnableServer(line.Trim())
+                                Entry = EnableServer(line).Trim()
                             };
                             if (upstreamServers == null) {
                                 upstreamServers = new List<NginxUpstreamServer> {

@@ -4,21 +4,24 @@ using System.Linq;
 namespace NginxServerFarms {
     internal static class NginxUpstreamExtensions {
 
+        private static readonly string Space = " ";
         private static readonly string Offline = "#";
         private static readonly string Begin = "{";
         private static readonly string End = "}";
         private static readonly string Upstream = "upstream";
         private static readonly string OnlineServer = "server";
-        private static readonly string OfflineServer = $"{Offline} {OnlineServer}";
+        private static readonly string OfflineServer = $"{Offline}{OnlineServer}";
 
         public static bool IsUpstream(string line) =>
-                    line.Trim()
-                        .StartsWith(Upstream);
+            line.Trim()
+                .StartsWith(Upstream);
 
         public static bool IsServer(string line) {
-            var trimmed = line.Trim();
-            return trimmed.StartsWith(OnlineServer) ||
-                   trimmed.StartsWith(OfflineServer);
+            var collapsed =
+                line.Replace(Space, string.Empty)
+                    .Trim();
+            return collapsed.StartsWith(OnlineServer) ||
+                   collapsed.StartsWith(OfflineServer);
         }
 
         public static bool IsEnabled(string line) =>
@@ -34,8 +37,15 @@ namespace NginxServerFarms {
                 .Replace(Begin, string.Empty)
                 .Trim();
 
-        public static string EnableServer(string line) =>
-            line.Replace(OfflineServer, OnlineServer);
+        public static string EnableServer(string line) {
+            var index = line.IndexOf(OnlineServer);
+            return
+                string.Concat(Enumerable.Repeat(
+                    Space,
+                    index > 0 ? index - 1 : index
+                )) +
+                line.Substring(index);
+        }
 
         public static string DisableServer(string line) =>
             line.Replace(OnlineServer, OfflineServer);
