@@ -29,8 +29,8 @@ push-location ./NginxServerFarms
 ## Prepare HTTPS Certificate
 
 ```powershell
-mkdir -p D:\nginx -ErrorAction Ignore
-push-location D:\nginx
+mkdir -p D:\suite\nginx -ErrorAction Ignore
+push-location D:\suite\nginx
 
 dotnet dev-certs https -t
 dotnet dev-certs https -ep server-farms.pfx -p 'password'
@@ -41,10 +41,10 @@ pop-location
 ## Prepare Service
 
 ```powershell
-mkdir -p D:\nginx\server-farms -ErrorAction Ignore
+mkdir -p D:\suite\nginx\server-farms -ErrorAction Ignore
 
 New-Service -Name NginxServerFarms `
-    -BinaryPathName='D:\nginx\server-farms\NginxServerFarms.exe' `
+    -BinaryPathName='D:\suite\nginx\server-farms\NginxServerFarms.exe' `
     -StartupType Automatic
 ```
 
@@ -53,8 +53,8 @@ New-Service -Name NginxServerFarms `
 ```powershell
 Stop-Service -Name NginxServerFarms
 
-dotnet publish -o D:\nginx\server-farms\ -c Debug
-robocopy ClientApp D:\nginx\server-farms\ClientApp /mir /z | Out-Null
+dotnet publish -o D:\suite\nginx\server-farms\ -c Debug
+robocopy ClientApp D:\suite\nginx\server-farms\ClientApp /mir /z | Out-Null
 
 Start-Service -Name NginxServerFarms
 ```
