@@ -22,7 +22,9 @@ VS Code has better JS intellisense, but VS has better C# and Nuget intellisense,
 
 # Setup
 
-cd ./NginxServerFarms
+```powershell
+push-location ./NginxServerFarms
+```
 
 ## Prepare HTTPS Certificate
 
