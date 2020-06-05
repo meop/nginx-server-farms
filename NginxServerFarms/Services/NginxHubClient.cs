@@ -1,20 +1,28 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 
 namespace NginxServerFarms.Services {
     internal class NginxHubClient : INginxHubClient {
+        private readonly IConfiguration configuration;
         private readonly INginxConfigFileService configFileService;
         private HubConnection hubConnection;
 
         public NginxHubClient(
+            IConfiguration configuration,
             INginxConfigFileService configFileService) {
+            this.configuration = configuration;
             this.configFileService = configFileService;
         }
 
         public async Task Connect(string hubPath) {
-            // todo mporter: figure out how to inject this base url
+            var baseUrl = this.configuration
+                .GetSection("Kestrel")
+                .GetSection("EndPoints")
+                .GetSection("Https")
+                .GetValue<string>("Url");
             this.hubConnection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:5001/nginxHub")
+                .WithUrl($"{baseUrl}/nginxHub")
                 .WithAutomaticReconnect()
                 .Build();
 

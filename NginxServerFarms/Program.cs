@@ -1,18 +1,25 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using NginxServerFarms.Services;
 
 namespace NginxServerFarms {
     public static class Program {
-        public static void Main(string[] args) {
-            var builder = CreateHostBuilder(args);
-            var host = builder.Build();
+        public static async Task Main(string[] args) {
+            try {
+                var builder = CreateHostBuilder(args);
+                using var host = builder.Build();
 
-            // create hub client after building host, to ensure all hub dependencies are setup
-            var client = (INginxHubClient)host.Services.GetService(typeof(INginxHubClient));
-            client.Connect("nginxHub");
+                await host.StartAsync().ConfigureAwait(false);
 
-            host.Run();
+                // create hub client after building host, to ensure all hub dependencies are setup
+                var client = (INginxHubClient)host.Services.GetService(typeof(INginxHubClient));
+                await client.Connect("nginxHub").ConfigureAwait(false);
+
+                await host.WaitForShutdownAsync().ConfigureAwait(false);
+            } finally {
+                WindowsProcessHelper.Stop();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

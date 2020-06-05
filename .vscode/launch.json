@@ -24,7 +24,12 @@
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
-            }
+            },
+            // note mporter: external console does not seem to work for dotnet core
+            // https: //github.com/microsoft/vscode/issues/81322
+            // vscode debug/plugin never responds to ctrl+c, and leaks node (cra) and nginx (proxy)
+            // processes when debugger terminates
+            "console": "integratedTerminal"
         },
         {
             "name": ".NET Core Attach",
